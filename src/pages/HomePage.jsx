@@ -5,11 +5,10 @@ const HomePage = () => {
   const featuredProducts = [
     { id: 1, name: 'Product 1', price: '$10' },
     { id: 2, name: 'Product 2', price: '$20' },
-    // Add more featured products
   ];
 
   return (
-    <div>
+    <div className="container">
       <h1>Featured Products</h1>
       <div className="product-grid">
         {featuredProducts.map((product) => (

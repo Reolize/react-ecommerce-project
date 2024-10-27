@@ -7,6 +7,9 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.4.3",
     "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "mongoose": "^8.7.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.27.0",
@@ -18,7 +21,8 @@
     "postcss": "^8.4.31"
   },
   "scripts": {
-    "start": "BROWSER=none WDS_SOCKET_PORT=0 vite --port 3000",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest"
@@ -44,7 +48,13 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.1.1",
     "jsdom": "^22.1.0",
+    "nodemon": "^3.1.7",
     "vite": "^4.5.5",
     "vitest": "^0.34.6"
-  }
+  },
+  "description": "Welcome to your shiny new Codespace running React! We've got everything fired up and running for you to explore React.",
+  "main": "vite.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

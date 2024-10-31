@@ -17,6 +17,9 @@ import Sidebars from "./Sidebar/Sidebars";
 import Card from "./components/Card";
 import "./index.css";
 import './styles.css';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+
 
 function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);

@@ -1,5 +1,7 @@
 import React from 'react';
 import ProductCard from '../components/ProductCard';
+import Banner from '../components/Banner'; // Adjust the path as necessary
+import ImageSlider from '../components/ImageSlider';
 
 const HomePage = () => {
   const featuredProducts = [
@@ -9,12 +11,14 @@ const HomePage = () => {
 
   return (
     <div className="container">
+      <Banner />
       <h1>Featured Products</h1>
       <div className="product-grid">
         {featuredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
+      <ImageSlider />
     </div>
   );
 };

@@ -14,7 +14,10 @@ const styles = {
     backgroundColor: '#000000',
     color: '#ffffff',
     textAlign: 'center',
-    marginTop: '30px',
+    position: 'fixed', // Fixes the footer at the bottom
+    bottom: 0,         // Aligns to the bottom of the viewport
+    left: 0,
+    right: 0,
   },
 };
 

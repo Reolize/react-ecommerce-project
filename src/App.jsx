@@ -15,8 +15,9 @@ import products from "./db/data";
 import Recommended from "./Recommended/Recommended";
 import Sidebars from "./Sidebar/Sidebars";
 import Card from "./components/Card";
-import "./index.css";
+
 import './styles.css';
+
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import Slider from 'react-slick';
 
-import promo1 from '../assets/images/promo-1.png'; // Import the image
-import promo2 from '../assets/images/promo-2.png'; // Import other images as needed
-import promo3 from '../assets/images/promo-3.png'; // Import other images as needed
+import promo1 from '../assets/images/promo-1.png'; 
+import promo2 from '../assets/images/promo-2.png'; 
+import promo3 from '../assets/images/promo-3.png'; 
 
 const ImageSlider = () => {
   const settings = {
@@ -12,6 +12,13 @@ const ImageSlider = () => {
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
+    autoplay: true, 
+    autoplaySpeed: 5000,
+    appendDots: dots => (
+      <div style={styles.dotsContainer}>
+        <ul style={{ margin: 0 }}>{dots}</ul>
+      </div>
+    ),
   };
 
   const images = [
@@ -36,10 +43,30 @@ const ImageSlider = () => {
 const styles = {
   slider: {
     width: '100%',
+    position: 'relative',
+    margin: 0,  // Remove any margin
+    padding: 0, // Remove any padding
+
   },
   image: {
-    width: '100%', // Ensure the image fills the slider
-    height: '400px', // Maintain aspect ratio
+    width: '100%',
+    height: '100%',
+    display: 'block',
+  },
+  dotsContainer: {
+    position: 'absolute', 
+    bottom: '10px', 
+    left: '50%', 
+    transform: 'translateX(-50%)',
+    display: 'flex', 
+    justifyContent: 'center',
+    //gap: '5px', 
+  },
+  dot: {
+    width: '10px', 
+    height: '10px',
+    borderRadius: '50%',
+    cursor: 'pointer',
   },
 };
 

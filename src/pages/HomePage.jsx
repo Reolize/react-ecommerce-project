@@ -11,14 +11,15 @@ const HomePage = () => {
 
   return (
     <div className="container">
+      <ImageSlider />
       <Banner />
-      <h1>Featured Products</h1>
+      <h1 style={{ textAlign: 'center' }}>Featured Products</h1>
       <div className="product-grid">
         {featuredProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      <ImageSlider />
+      
     </div>
   );
 };

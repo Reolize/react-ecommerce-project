@@ -17,6 +17,12 @@ import products from "./db/data";
 import Recommended from "./Recommended/Recommended";
 import Sidebars from "./Sidebar/Sidebars";
 import Card from "./components/Card";
+import Cards from "./pages/Cards";
+import Register from './pages/Register';
+import Login from './pages/Login';
+import axios from 'axios';
+import { Toaster } from 'react-hot-toast';
+
 
 import './styles.css';
 
@@ -117,7 +123,9 @@ function App() {
     <Router>
       <Header />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path='/register' element={<Register />} />
+        <Route path='/login' element={<Login />} />
+        <Route path="/" element={<Cards />} />
         <Route path="/products" element={<><Sidebars handleChange={handleChange} />
         <Navigation query={query} handleInputChange={handleInputChange} />
         <Recommended handleClick={handleClick} />

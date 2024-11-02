@@ -8,8 +8,10 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import Header from './components/Header';
 import Footer from './components/Footer';
-
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import Navigation from "./Navigation/Nav";
+import Navigationnosearch from "./Navigation/Navnosearch";
 import Products from "./Products/Products";
 import products from "./db/data";
 import Recommended from "./Recommended/Recommended";
@@ -27,6 +29,7 @@ function App() {
 
   // ----------- Input Filter -----------
   const [query, setQuery] = useState("");
+  const [cart, setCart] = useState([])
 
   const handleInputChange = (event) => {
     setQuery(event.target.value);
@@ -44,6 +47,32 @@ function App() {
   // ------------ Button Filtering -----------
   const handleClick = (event) => {
     setSelectedCategory(event.target.value);
+  };
+
+  const addToCart = (product) => {
+    setCart((prevCart) => {
+      console.log("Current cart:", prevCart);
+      if (!Array.isArray(prevCart)) {
+        console.error("prevCart is not an array:", prevCart);
+        return [product];
+      }
+      return [...prevCart, product];
+    });
+    toast.success(`${product.title} has been added to your cart!`);
+  };
+
+  const updateQuantity = (index, change) => {
+    setCart((prevCart) => {
+      const updatedCart = [...prevCart];
+      const newQuantity = updatedCart[index].quantity + change;
+
+      // Ensure quantity doesn't go below 1
+      if (newQuantity > 0) {
+        updatedCart[index].quantity = newQuantity;
+      }
+
+      return updatedCart;
+    });
   };
 
   function filteredData(products, selected, query) {
@@ -67,7 +96,7 @@ function App() {
     }
 
     return filteredProducts.map(
-      ({ img, title, star, reviews, prevPrice, newPrice }) => (
+      ({ img, title, star, reviews, prevPrice, newPrice, quantity }) => (
         <Card
           key={Math.random()}
           img={img}
@@ -76,6 +105,7 @@ function App() {
           reviews={reviews}
           prevPrice={prevPrice}
           newPrice={newPrice}
+          addToCart={() => addToCart({ img, title, star, reviews, prevPrice, newPrice ,quantity })}
         />
       )
     );
@@ -93,9 +123,16 @@ function App() {
         <Recommended handleClick={handleClick} />
         <Products result={result} /></>} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<CartPage />} />
+        <Route path="/cart" element={
+        <>
+        <Navigationnosearch />
+        <CartPage cart={cart} updateQuantity={updateQuantity} />
+        
+        </>
+        } />
         <Route path="/checkout" element={<CheckoutPage />} />
       </Routes>
+      <ToastContainer />
       <Footer />
     </Router>
   );

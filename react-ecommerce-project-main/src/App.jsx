@@ -36,7 +36,7 @@ function App() {
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState([]);
   const [products, setProducts] = useState([]);
-
+ 
   const logOut = () => {
     removeCookie("jwt");
     setLoggedIn(false);
@@ -47,7 +47,7 @@ function App() {
     const verifyUser = async () => {
       if (cookies.jwt) {
         try {
-          const { data } = await axios.post("http://localhost:4000", {}, { withCredentials: true });
+          const { data } = await axios.post("http://localhost:4000/api", {}, { withCredentials: true });
           if (data.status) {
             setLoggedIn(true);
             toast(`Hi ${data.user} 🦄`, { theme: "dark" });
@@ -88,7 +88,7 @@ function App() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/fetch');
+        const response = await axios.get('http://localhost:4000/products/fetch');
         setProducts(response.data); // Set products state with fetched data
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -109,6 +109,7 @@ function App() {
     });
     toast.success(`${product.title} has been added to your cart!`);
   };
+
 
   const updateQuantity = (index, change) => {
     setCart((prevCart) => {
@@ -177,6 +178,8 @@ function App() {
 
   const result = filteredData();
 
+
+  
   return (
     <Router>
       <Header loggedIn={loggedIn} onLogout={logOut} />

@@ -13,7 +13,7 @@ function Login({ onLogin }) {
 
   useEffect(() => {
     if (cookies.jwt) {
-      navigate("/");
+      navigate("/api");
     }
   }, [cookies, navigate]);
 
@@ -30,7 +30,7 @@ function Login({ onLogin }) {
     }
     try {
       const { data } = await axios.post(
-        "http://localhost:4000/login",
+        "http://localhost:4000/user/login",
         { ...values },
         { withCredentials: true }
       );

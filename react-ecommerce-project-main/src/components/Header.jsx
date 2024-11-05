@@ -1,29 +1,33 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-const Header = ({ loggedIn, onLogin, onLogout }) => {
+const Header = ({ loggedIn, onLogout }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     onLogout(); // Call the onLogout function passed as a prop
-    navigate("/"); // Navigate to login after logout
+    navigate("/"); // Navigate to home after logout
   };
 
   return (
     <header style={styles.header}>
       <nav>
         <ul style={styles.navList}>
-          <li style={{ ...styles.navItem, textAlign: "center" }}>
+          <li style={styles.navItem}>
             <Link to="/" style={styles.link}>Home</Link>
           </li>
-          <li style={{ ...styles.navItem, textAlign: "center" }}>
+          <li style={styles.navItem}>
             <Link to="/products" style={styles.link}>Products</Link>
           </li>
-          <li style={{ ...styles.navItem, textAlign: "center" }}>
+          <li style={styles.navItem}>
             <Link to="/cart" style={styles.link}>Cart</Link>
           </li>
-          <li style={{ ...styles.navItem, textAlign: "right", marginLeft: '500%' }}>
-            <Link to="/login2" onClick={loggedIn ? handleLogout : () => navigate("/login")} style={styles.link}>
+          <li style={{ ...styles.navItem, marginLeft: 'auto' }}>
+            <Link
+              to={loggedIn ? "/" : "/login"}
+              onClick={loggedIn ? handleLogout : null} // Log out when clicked if logged in
+              style={styles.link}
+            >
               {loggedIn ? "Logout" : "Login"}
             </Link>
           </li>
@@ -43,7 +47,7 @@ const styles = {
     listStyle: 'none',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center', // Ensure vertical centering
+    alignItems: 'center',
   },
   navItem: {
     margin: '0 15px',

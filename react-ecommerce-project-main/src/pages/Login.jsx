@@ -1,100 +1,56 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
-import { useCookies } from "react-cookie";
-import { ToastContainer, toast } from "react-toastify";
-import "../pages/Login.css";
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
 
-function Login({ onLogin }) {
-  const [cookies] = useCookies([]);
+
+export default function Login() {
   const navigate = useNavigate();
-  const [values, setValues] = useState({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
+  const [data, setData] = useState({
+    name: '',
+    password: '',
+  });
 
-  useEffect(() => {
-    if (cookies.jwt) {
-      navigate("/api");
-    }
-  }, [cookies, navigate]);
-
-  const generateError = (error) =>
-    toast.error(error, {
-      position: "bottom-right",
-    });
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!values.email || !values.password) {
-      generateError("Email and password are required.");
-      return;
-    }
+  const loginUser = async (e) => {
+    e.preventDefault();
+    const { name, password } = data;
     try {
-      const { data } = await axios.post(
-        "http://localhost:4000/user/login",
-        { ...values },
-        { withCredentials: true }
-      );
-      if (data) {
-        if (data.errors) {
-          const { email, password } = data.errors;
-          if (email) generateError(email);
-          else if (password) generateError(password);
-        } else {
-          onLogin();
-          navigate("/");
-        }
-      }
-    } catch (ex) {
-      if (ex.response) {
-        generateError(ex.response.data.message || "An error occurred. Please try again.");
+      const response = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          name: name,
+          password: password
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.error) {
+        toast.error(result.error);
       } else {
-        generateError("Network error. Please check your connection.");
+        setData({ name: '', password: '' });
+        navigate('/');
       }
-      console.log(ex);
+    } catch (error) {
+      console.log(error);
+      toast.error('An error occurred. Please try again.');
     }
   };
 
   return (
-    <div className="login">
-      <div className="container">
-        <h2 className="form__title">Login to your Account</h2>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              onChange={(e) =>
-                setValues({ ...values, [e.target.name]: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor="password">Password</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="Password"
-              name="password"
-              onChange={(e) =>
-                setValues({ ...values, [e.target.name]: e.target.value })
-              }
-              required
-            />
-            <button type="button" onClick={() => setShowPassword(!showPassword)}>
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-          <button type="submit">Submit</button>
-          <span>
-            Don't have an account? <Link to="/register"> Register </Link>
-          </span>
-        </form>
-        <ToastContainer />
-      </div>
+    <div>
+      <form onSubmit={loginUser}>
+        <label>Username</label>
+        <input type='text' placeholder='Enter Username...' value={data.name} onChange={(e) => setData({ ...data, name: e.target.value })} />
+        <label>Password</label>
+        <input type='password' placeholder='Enter password...' value={data.password} onChange={(e) => setData({ ...data, password: e.target.value })} />
+        <button type='submit'>Login</button>
+        <Link to='/register'>
+            <button type='submit'>register</button>
+        </Link>
+      </form>
     </div>
   );
 }
-
-export default Login;

@@ -24,7 +24,7 @@ const Warehouse = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/products/fetch');
+      const response = await axios.get('http://localhost:8000/products/fetch');
       console.log("Fetched Products :", response.data);
       setProducts(response.data);
     } catch (error) {
@@ -57,7 +57,7 @@ const Warehouse = () => {
 
   const submitProducts = async () => {
     try {
-      const response = await axios.post('http://localhost:4000/products/create', forms[0]);
+      const response = await axios.post('http://localhost:8000/products/create', forms[0]);
       setProducts([...products, response.data]);
       resetForms();
     } catch (error) {
@@ -83,7 +83,7 @@ const Warehouse = () => {
   const deleteProduct = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`http://localhost:4000/products/delete/${id}`);
+        await axios.delete(`http://localhost:8000/products/delete/${id}`);
         setProducts(products.filter((product) => product._id !== id));
       } catch (error) {
         console.error('Error deleting product:', error);
@@ -95,7 +95,7 @@ const Warehouse = () => {
     if (!editProduct) return;
 
     try {
-      const response = await axios.put(`http://localhost:4000/products/update/${editProduct._id}`, forms[0]);
+      const response = await axios.put(`http://localhost:8000/products/update/${editProduct._id}`, forms[0]);
       setProducts(products.map(product => (product._id === editProduct._id ? response.data : product)));
       resetForms();
       setEditProduct(null);

@@ -13,7 +13,7 @@ export default function Cards() {
         navigate("/login");
       } else {
         const { data } = await axios.post(
-          "http://localhost:4000/user",
+          "http://localhost:3000/api/users",
           {},
           {
             withCredentials: true,

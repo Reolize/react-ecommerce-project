@@ -34,7 +34,7 @@ function Register() {
               if (email) generateError(email);
               else if (password) generateError(password);
           } else {
-              navigate("/");
+              navigate("/login");
           }
       }
   } catch (ex) {
@@ -70,7 +70,7 @@ function Register() {
         </div>
         <button type="submit">Submit</button>
         <span>
-          Already have an account ?<Link to="/login"> Login</Link>
+          Already have an account ?<Link to="/login2"> Login</Link>
         </span>
       </form>
       <ToastContainer />

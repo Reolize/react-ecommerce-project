@@ -1,7 +1,7 @@
 import React from "react";
 import '../pages/CartPage.css';
 
-function CartPage({ cart, updateQuantity }) {
+function CartPage({ cart, updateQuantity, removeItem }) {
   const totalPrice = cart.reduce((total, item) => {
     const price = Number(item.newPrice);
     return total + price * item.quantity;
@@ -14,6 +14,11 @@ function CartPage({ cart, updateQuantity }) {
   const handleDecrement = (index) => {
     updateQuantity(index, -1); 
   };
+
+  const handleDelete = (index) => {
+    removeItem(index);
+  }
+
 
   return (
     <div className="cart-page">
@@ -30,6 +35,7 @@ function CartPage({ cart, updateQuantity }) {
                   <button onClick={() => handleDecrement(index)} disabled={item.quantity <= 1}>−</button>
                   <span>  {item.quantity}  </span>
                   <button onClick={() => handleIncrement(index)}>+</button>
+                  <button onClick={() => handleDelete(index)}> remove </button>
                 </div>
               </li>
             ))}

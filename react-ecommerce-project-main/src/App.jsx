@@ -1,6 +1,6 @@
-import { useState, useEffect  } from "react";
+import { useState, useEffect } from "react";
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ProductListPage from './pages/ProductListPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -13,7 +13,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Navigation from "./Navigation/Nav";
 import Navigationnosearch from "./Navigation/Navnosearch";
 import Products from "./Products/Products";
-import products from "./db/data";
+import products from "./pages/Warehouse";
 import Recommended from "./Recommended/Recommended";
 import Sidebars from "./Sidebar/Sidebars";
 import Card from "./components/Card";
@@ -25,16 +25,17 @@ import { Toaster } from 'react-hot-toast';
 import AuthButtons from "./components/LoginCheck";
 import { useCookies } from "react-cookie";
 import './styles.css';
-
+import Warehouse from "./pages/Warehouse";
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-
 function App() {
-
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [cookies, setCookie, removeCookie] = useCookies([]);
+  const [query, setQuery] = useState("");
+  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
 
   const logOut = () => {
     removeCookie("jwt");
@@ -42,7 +43,6 @@ function App() {
     navigate("/login");
   };
 
-  // Function to verify user on app load
   useEffect(() => {
     const verifyUser = async () => {
       if (cookies.jwt) {
@@ -65,47 +65,47 @@ function App() {
     verifyUser();
   }, [cookies, removeCookie]);
 
-  // Function to simulate logging in
   const handleLogin = () => {
     setLoggedIn(true);
   };
 
-  // Function to simulate logging out
   const handleLogout = () => {
     setLoggedIn(false);
-
   };
-
-  // ----------- Input Filter -----------
-  const [query, setQuery] = useState("");
-  const [cart, setCart] = useState([])
 
   const handleInputChange = (event) => {
     setQuery(event.target.value);
   };
 
-  const filteredItems = products.filter(
-    (product) => product.title.toLowerCase().indexOf(query.toLowerCase()) !== -1
-  );
-
-  // ----------- Radio Filtering -----------
   const handleChange = (event) => {
     setSelectedCategory(event.target.value);
   };
 
-  // ------------ Button Filtering -----------
   const handleClick = (event) => {
     setSelectedCategory(event.target.value);
   };
+  // Fetch products on app load
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/fetch');
+        setProducts(response.data); // Set products state with fetched data
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   const addToCart = (product) => {
     setCart((prevCart) => {
-      console.log("Current cart:", prevCart);
-      if (!Array.isArray(prevCart)) {
-        console.error("prevCart is not an array:", prevCart);
-        return [product];
+      const existingProductIndex = prevCart.findIndex(item => item.title === product.title);
+      if (existingProductIndex !== -1) {
+        const updatedCart = [...prevCart];
+        updatedCart[existingProductIndex].quantity += 1; // Increment quantity
+        return updatedCart;
       }
-      return [...prevCart, product];
+      return [...prevCart, { ...product, quantity: 1 }];
     });
     toast.success(`${product.title} has been added to your cart!`);
   };
@@ -115,57 +115,74 @@ function App() {
       const updatedCart = [...prevCart];
       const newQuantity = updatedCart[index].quantity + change;
 
-      // Ensure quantity doesn't go below 1
       if (newQuantity > 0) {
         updatedCart[index].quantity = newQuantity;
       }
-
       return updatedCart;
     });
   };
 
-  function filteredData(products, selected, query) {
-    let filteredProducts = products;
+  const removeItem = (index) => {
+    setCart((prevCart) => prevCart.filter((_, i) => i !== index));
+  };
 
-    // Filtering Input Items
+  const filterProducts = (products, query, selectedCategory) => {
+    let filteredProducts = products || []; // Ensure products is an array
+
     if (query) {
-      filteredProducts = filteredItems;
-    }
-
-    // Applying selected filter
-    if (selected) {
-      filteredProducts = filteredProducts.filter(
-        ({ category, color, company, newPrice, title }) =>
-          category === selected ||
-          color === selected ||
-          company === selected ||
-          newPrice === selected ||
-          title === selected
+      filteredProducts = filteredProducts.filter((product) =>
+        product.title.toLowerCase().includes(query.toLowerCase())
       );
     }
 
+    if (selectedCategory) {
+      filteredProducts = filteredProducts.filter(
+        ({ category, color, company, newprice, title }) =>
+          category === selectedCategory ||
+          color === selectedCategory ||
+          company === selectedCategory ||
+          newprice === selectedCategory ||
+          title === selectedCategory
+      );
+    }
+
+    return filteredProducts; // This should always be an array
+  };
+
+  const renderProductCards = (filteredProducts) => {
+    console.log("Filtered Products:", filteredProducts); // Debugging log
+    if (!Array.isArray(filteredProducts)) {
+      console.error("filteredProducts is not an array:", filteredProducts);
+      return null; // Return null or a fallback UI
+    }
+
     return filteredProducts.map(
-      ({ img, title, star, reviews, prevPrice, newPrice, quantity }) => (
+      ({ img, title, prevprice, newprice, quantity }) => (
         <Card
           key={Math.random()}
           img={img}
           title={title}
-          star={star}
-          reviews={reviews}
-          prevPrice={prevPrice}
-          newPrice={newPrice}
-          addToCart={() => addToCart({ img, title, star, reviews, prevPrice, newPrice, quantity })}
+          prevprice={prevprice}
+          newprice={newprice}
+          addToCart={() => addToCart({ img, title, prevprice, newprice, quantity })}
         />
       )
     );
+  };
+  
+  function filteredData() {
+    const filteredProducts = filterProducts(products, query, selectedCategory);
+    return renderProductCards(filteredProducts);
   }
 
-  const result = filteredData(products, selectedCategory, query);
+  const result = filteredData();
 
   return (
     <Router>
       <Header loggedIn={loggedIn} onLogout={logOut} />
+      <Footer />
       <Routes>
+        <Route path='/warehouse' element={<Warehouse />} />
         <Route path='/register' element={<Register />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path='/login2' element={<Cards />} />
@@ -180,13 +197,14 @@ function App() {
         <Route path="/cart" element={
           <>
             <Navigationnosearch />
-            <CartPage cart={cart} updateQuantity={updateQuantity} />
+            <CartPage cart={cart} updateQuantity={updateQuantity} removeItem={removeItem} />
           </>
         } />
         <Route path="/checkout" element={<CheckoutPage />} />
       </Routes>
+      
       <ToastContainer />
-      <Footer />
+     
     </Router>
   );
 }

@@ -1,34 +1,42 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-const userSchema = new mongoose.Schema({
-  email: {
+const userSchemaData = new mongoose.Schema({
+  img: {
     type: String,
-    required: [true, "Email is Required"],
-    unique: true,
+
   },
-  password: {
+  title: {
+    type: String, 
+
+  },
+
+  prevprice: {
     type: String,
-    required: [true, "Password is Required"],
+
   },
-});
+  newprice: {
+    type: String,
 
-userSchema.pre("save", async function (next) {
-  const salt = await bcrypt.genSalt();
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
+  },
+  company: {
+    type: String,
 
-userSchema.statics.login = async function (email, password) {
-  const user = await this.findOne({ email });
-  if (user) {
-    const auth = await bcrypt.compare(password, user.password);
-    if (auth) {
-      return user;
-    }
-    throw Error("incorrect password");
-  }
-  throw Error("incorrect email");
-};
+  },
+  color: {
+    type: String,
 
-module.exports = mongoose.model("Users", userSchema);
+  },
+  category: {
+    type: String,
+
+  },
+  quantity: {
+    type: Number,
+
+  },
+
+})
+
+const Products = mongoose.model("Product", userSchemaData);
+module.exports = Products;

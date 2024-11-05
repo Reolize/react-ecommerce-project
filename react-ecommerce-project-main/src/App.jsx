@@ -29,41 +29,18 @@ import Warehouse from "./pages/Warehouse";
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
+axios.defaults.baseURL = 'http://localhost:8000';
+axios.defaults.withCredentials = true;
+
 function App() {
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [loggedIn, setLoggedIn] = useState(false);
+  // Define isLoggedIn state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cookies, setCookie, removeCookie] = useCookies([]);
+
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState([]);
   const [products, setProducts] = useState([]);
-
-  const logOut = () => {
-    removeCookie("jwt");
-    setLoggedIn(false);
-    navigate("/login");
-  };
-
-  useEffect(() => {
-    const verifyUser = async () => {
-      if (cookies.jwt) {
-        try {
-          const { data } = await axios.post("http://localhost:4000", {}, { withCredentials: true });
-          if (data.status) {
-            setLoggedIn(true);
-            toast(`Hi ${data.user} 🦄`, { theme: "dark" });
-          } else {
-            removeCookie("jwt");
-            setLoggedIn(false);
-          }
-        } catch (error) {
-          console.error("Error verifying user:", error);
-          removeCookie("jwt");
-          setLoggedIn(false);
-        }
-      }
-    };
-    verifyUser();
-  }, [cookies, removeCookie]);
 
   const handleLogin = () => {
     setLoggedIn(true);
@@ -88,7 +65,7 @@ function App() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/fetch');
+        const response = await axios.get('http://localhost:8000/products/fetch');
         setProducts(response.data); // Set products state with fetched data
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -109,6 +86,7 @@ function App() {
     });
     toast.success(`${product.title} has been added to your cart!`);
   };
+
 
   const updateQuantity = (index, change) => {
     setCart((prevCart) => {
@@ -169,7 +147,7 @@ function App() {
       )
     );
   };
-  
+
   function filteredData() {
     const filteredProducts = filterProducts(products, query, selectedCategory);
     return renderProductCards(filteredProducts);
@@ -177,34 +155,53 @@ function App() {
 
   const result = filteredData();
 
+  // Log out function (remove cookie and update state)
+  const logoutUser = async () => {
+    try {
+      await fetch('http://localhost:8000/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      removeCookie("jwt");
+      setIsLoggedIn(false);
+    } catch (error) {
+      console.log('Error logging out:', error);
+    }
+  };
+
+  // Check login status
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/profile', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const data = await response.json();
+        setIsLoggedIn(!!data);
+      } catch (error) {
+        setIsLoggedIn(false);
+      }
+    };
+    checkLoginStatus();
+  }, []);
+
   return (
     <Router>
-      <Header loggedIn={loggedIn} onLogout={logOut} />
+      {/* Pass isLoggedIn and logoutUser to Header for conditional rendering */}
+      <Header isLoggedIn={isLoggedIn} logoutUser={logoutUser} />
       <Footer />
       <Routes>
         <Route path='/warehouse' element={<Warehouse />} />
         <Route path='/register' element={<Register />} />
-        <Route path="/login" element={<Login onLogin={handleLogin} />} />
-        <Route path='/login2' element={<Cards />} />
+        <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
         <Route path="/" element={<HomePage />} />
-        <Route path="/products" element={<>
-          <Sidebars handleChange={handleChange} />
-          <Navigation query={query} handleInputChange={handleInputChange} />
-          <Recommended handleClick={handleClick} />
-          <Products result={result} />
-        </>} />
+        <Route path="/products" element={<ProductListPage />} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={
-          <>
-            <Navigationnosearch />
-            <CartPage cart={cart} updateQuantity={updateQuantity} removeItem={removeItem} />
-          </>
-        } />
+        <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
       </Routes>
-      
       <ToastContainer />
-     
     </Router>
   );
 }

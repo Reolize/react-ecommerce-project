@@ -1,48 +1,29 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const authRoutes = require("./routes/authRoutes");
-const authRouteslogin = require("./routes/authRouteslogin");
-const cookieParser = require("cookie-parser");
-require('dotenv').config(); 
-
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
 const app = express();
 
-app.listen(4000, (err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log("Server Started Successfully.");
-  }
-});
+// database connect
+mongoose.connect('mongodb+srv://Ize:023@cluster0.m2eae.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0')
+.then(() => console.log('Database Connected'))
+.catch((err) => console.log('Database not connected', err))
 
-mongoose
-  .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("DB Connection Successful");
-  })
-  .catch((err) => {
-    console.log(err.message);
-  });
+// middleware
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({extended: true}))
+
+app.use('/', require('./routes/authRoutes'))
+app.use("/products", require('./routes/routes-product'));
+
+
 
 app.use(cors({
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
+    origin: 'http://your-frontend-url.com', // Replace with your frontend URL
+    credentials: true
 }));
 
-app.use(cookieParser());
-app.use(express.json());
+const port = 8000;
+app.listen(port, () => console.log('Server is running on port : ' + port )) 
 
-// Use your routes
-app.use("/", authRouteslogin);
-app.use("/", authRoutes);
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});

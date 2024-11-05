@@ -1,81 +1,57 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import { useCookies } from "react-cookie";
-import { Link, useNavigate } from "react-router-dom";
-function Register() {
-  const [cookies] = useCookies(["cookie-name"]);
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (cookies.jwt) {
-      navigate("/");
-    }
-  }, [cookies, navigate]);
+import { useState } from "react";
+import { toast } from 'react-hot-toast';
+import { useNavigate } from "react-router-dom";
 
-  const [values, setValues] = useState({ email: "", password: "" });
-  const generateError = (error) =>
-    toast.error(error, {
-      position: "bottom-right",
-    });
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+export default function Register() {
+  const navigate = useNavigate();
+  const [data, setData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+
+  const registerUser = async (e) => {
+    e.preventDefault();
+    const { name, email, password } = data;
     try {
-      const { data } = await axios.post(
-          "http://localhost:4000/register", // Changed to HTTPS
-          {
-              ...values,
-          },
-          { withCredentials: true }
-      );
-  
-      if (data) {
-          if (data.errors) {
-              const { email, password } = data.errors;
-              if (email) generateError(email);
-              else if (password) generateError(password);
-          } else {
-              navigate("/login");
-          }
+      const response = await fetch('http://localhost:8000/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          name: name,
+          email: email,
+          password: password
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        setData({ name: '', email: '', password: '' });
+        toast.success('Registered successfully. Welcome!');
+        navigate('/login');
       }
-  } catch (ex) {
-      console.log(ex);
-  }
-  
+    } catch (error) {
+      console.log(error);
+      toast.error('An error occurred. Please try again.');
+    }
   };
+
   return (
-    <div className="container">
-      <h2>Register Account</h2>
-      <form onSubmit={(e) => handleSubmit(e)}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            onChange={(e) =>
-              setValues({ ...values, [e.target.name]: e.target.value })
-            }
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            placeholder="Password"
-            name="password"
-            onChange={(e) =>
-              setValues({ ...values, [e.target.name]: e.target.value })
-            }
-          />
-        </div>
-        <button type="submit">Submit</button>
-        <span>
-          Already have an account ?<Link to="/login2"> Login</Link>
-        </span>
+    <div>
+      <form onSubmit={registerUser}>
+        <label>Name</label>
+        <input type='text' placeholder='Enter name...' value={data.name} onChange={(e) => setData({ ...data, name: e.target.value })} />
+        <label>Email</label>
+        <input type='email' placeholder='Enter email...' value={data.email} onChange={(e) => setData({ ...data, email: e.target.value })} />
+        <label>Password</label>
+        <input type='password' placeholder='Enter password...' value={data.password} onChange={(e) => setData({ ...data, password: e.target.value })} />
+        <button type='submit'>Submit</button>
       </form>
-      <ToastContainer />
     </div>
   );
 }
-
-export default Register;

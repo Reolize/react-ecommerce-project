@@ -10,13 +10,9 @@ const Navnosearch = () => {
       <div className="nav-container">
       </div>
       <div className="profile-container">
-        <a href="#">
-          <FiHeart className="nav-icons" />
-        </a>
-          <Link to="/cart" className="nav-icons">Cart</Link>
-        <a href="">
-          <AiOutlineUserAdd className="nav-icons" />
-        </a>
+          <Link to="/cart" className="nav-icons">
+              <AiOutlineShoppingCart className="nav-icons" />
+          </Link>
       </div>
     </nav>
   );

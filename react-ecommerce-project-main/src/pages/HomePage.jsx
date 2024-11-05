@@ -10,7 +10,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="container">
+    <div className="container2">
       <ImageSlider />
       <Banner />
       <h1 style={{ textAlign: 'center' }}>Featured Products</h1>

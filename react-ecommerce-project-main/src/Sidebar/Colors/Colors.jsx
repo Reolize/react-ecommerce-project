@@ -4,7 +4,7 @@ import Input from "../../components/Input";
 const Colors = ({ handleChange }) => {
   return (
     <>
-      <div>
+      <div className="m2">
         <h2 className="sidebar-title color-title">Colors</h2>
         <label className="sidebar-label-container">
           <input onChange={handleChange} type="radio" value="" name="test1" />
@@ -42,6 +42,22 @@ const Colors = ({ handleChange }) => {
           title="Green"
           name="test1"
           color="green"
+        />
+
+        <Input
+          handleChange={handleChange}
+          value="gray"
+          title="Gray"
+          name="test1"
+          color="gray"
+        />
+
+        <Input
+          handleChange={handleChange}
+          value="yellow"
+          title="Yellow"
+          name="test1"
+          color="Yellow"
         />
 
         <label className="sidebar-label-container">

@@ -1,4 +1,4 @@
-const User = require("../model/authModel");
+const authRouteslogin = require("./routes/authRouteslogin");
 const jwt = require("jsonwebtoken");
 
 const maxAge = 3 * 24 * 60 * 60;

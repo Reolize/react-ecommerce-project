@@ -5,7 +5,7 @@ const ProductCard = ({ product }) => {
   return (
     <div style={styles.card}>
       <h3>{product.name}</h3>
-      <p>{product.price}</p>
+      <p>{product.Price}</p>
       <Link to={`/products/${product.id}`} style={styles.link}>View Details</Link>
     </div>
   );

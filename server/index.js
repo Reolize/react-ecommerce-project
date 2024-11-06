@@ -20,7 +20,8 @@ app.use("/products", require('./routes/routes-product'));
 
 
 app.use(cors({
-    origin: 'http://your-frontend-url.com', // Replace with your frontend URL
+    origin: 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Replace with your frontend URL
     credentials: true
 }));
 

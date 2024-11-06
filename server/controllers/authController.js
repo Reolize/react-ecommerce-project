@@ -1,98 +1,68 @@
-const User = require('../model/model-user');
-const { comparePassword } = require('../helpers/auth');
-const jwt = require('jsonwebtoken');
+const User = require("../model/model-user");
+const jwt = require("jsonwebtoken");
 
-const test = (req, res) => {
-    res.json('test is working');
+const maxAge = 3 * 24 * 60 * 60;
+const createToken = (id) => {
+  return jwt.sign({ id }, "kishan sheth super secret key", {
+    expiresIn: maxAge,
+  });
 };
 
-// Register Endpoint
-const registerUser = async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
+const handleErrors = (err) => {
+  let errors = { email: "", password: "" };
 
-        // Check if name was entered
-        if (!name) {
-            return res.json({
-                error: 'Name is required'
-            });
-        }
-        // Check if password is valid
-        if (!password || password.length < 6) {
-            return res.json({
-                error: 'Password is required and should be at least 6 characters long'
-            });
-        }
-        // Check email
-        
+  console.log(err);
+  if (err.message === "incorrect email") {
+    errors.email = "That email is not registered";
+  }
 
-        // Create user in the database without hashing the password
-        const user = await User.create({
-            name,
-            email,
-            password, // Store the plain password
-        });
+  if (err.message === "incorrect password") {
+    errors.password = "That password is incorrect";
+  }
 
-        return res.json(user);
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+  if (err.code === 11000) {
+    errors.email = "Email is already registered";
+    return errors;
+  }
+
+  if (err.message.includes("Users validation failed")) {
+    Object.values(err.errors).forEach(({ properties }) => {
+      errors[properties.path] = properties.message;
+    });
+  }
+
+  return errors;
 };
 
-// Login Endpoint
-const LoginUser = async (req, res) => {
-    try {
-        const { name, password } = req.body;
+module.exports.register = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.create({ email, password });
+    const token = createToken(user._id);
 
-        // Check if user exists
-        const user = await User.findOne({ name });
-        if (!user) { // Check if user was found
-            return res.json({
-                error: 'No user found'
-            });
-        }
+    res.cookie("jwt", token, {
+      withCredentials: true,
+      httpOnly: false,
+      maxAge: maxAge * 1000,
+    });
 
-        // Check if password matches (you might want to change this logic)
-        const match = password === user.password; // Direct comparison
-        if (match) {
-            jwt.sign({ email: user.email, id: user._id, name: user.name }, '12345678', {}, (err, token) => {
-                if (err) throw err;
-                res.cookie('token', token).json(user);
-            });
-        } else {
-            res.json({
-                error: "Password does not match"
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
+    res.status(201).json({ user: user._id, created: true });
+  } catch (err) {
+    console.log(err);
+    const errors = handleErrors(err);
+    res.json({ errors, created: false });
+  }
 };
 
-// Logout Endpoint
-const logoutUser = (req, res) => {
-    res.clearCookie('token'); // Assuming 'token' is the cookie name
-    res.json({ message: 'Logged out successfully' });
-  };
-
-const getProfile = (req, res) => {
-    const { token } = req.cookies;
-    if (token) {
-        jwt.verify(token, '12345678', {}, (err, user) => {
-            if (err) throw err;
-            res.json(user);
-        });
-    } else {
-        res.json(null);
-    }
-};
-
-module.exports = {
-    logoutUser,
-    test,
-    registerUser,
-    LoginUser,
-    getProfile
+module.exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.login(email, password);
+    const token = createToken(user._id);
+    res.cookie("jwt", token, { httpOnly: false, maxAge: maxAge * 1000 });
+    res.status(200).json({ user: user._id, status: true });
+  } catch (err) {
+    const errors = handleErrors(err);
+    res.json({ errors, status: false });
+  }
 };

@@ -1,13 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
 
-const Header = ({ loggedIn, onLogout }) => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    onLogout(); // Call the onLogout function passed as a prop
-    navigate("/"); // Navigate to home after logout
-  };
+const Header = ({ isLoggedIn }) => {
 
   return (
     <header style={styles.header}>
@@ -23,13 +18,9 @@ const Header = ({ loggedIn, onLogout }) => {
             <Link to="/cart" style={styles.link}>Cart</Link>
           </li>
           <li style={{ ...styles.navItem, marginLeft: 'auto' }}>
-            <Link
-              to={loggedIn ? "/" : "/login"}
-              onClick={loggedIn ? handleLogout : null} // Log out when clicked if logged in
-              style={styles.link}
-            >
-              {loggedIn ? "Logout" : "Login"}
-            </Link>
+            <button onClick={isLoggedIn ? handleLogout : () => window.location.href = '/login'}>
+              {isLoggedIn ? 'Logout' : 'Login'}
+            </button>
           </li>
         </ul>
       </nav>

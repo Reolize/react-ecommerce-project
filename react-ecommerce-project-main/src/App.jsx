@@ -33,22 +33,39 @@ axios.defaults.baseURL = 'http://localhost:8000';
 axios.defaults.withCredentials = true;
 
 function App() {
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  // Define isLoggedIn state
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cookies, setCookie, removeCookie] = useCookies([]);
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState([]);
   const [products, setProducts] = useState([]);
 
-  const handleLogin = () => {
-    setLoggedIn(true);
-  };
 
-  const handleLogout = () => {
-    setLoggedIn(false);
-  };
+
+  useEffect(() => {
+    const verifyUser = async () => {
+      if (cookies.jwt) {
+        try {
+          const { data } = await axios.post("http://localhost:8000", {}, { withCredentials: true });
+          if (data.status) {
+            setIsLoggedIn(true);
+            toast(`Hi ${data.user} 🦄`, { theme: "dark" });
+          } else {
+            removeCookie("jwt");
+            setIsLoggedIn(false);
+          }
+        } catch (error) {
+          console.error("Error verifying user:", error);
+          removeCookie("jwt");
+          setIsLoggedIn(false);
+        }
+      }
+    };
+    verifyUser();
+  }, [cookies, removeCookie]);
+
 
   const handleInputChange = (event) => {
     setQuery(event.target.value);
@@ -152,56 +169,59 @@ function App() {
     const filteredProducts = filterProducts(products, query, selectedCategory);
     return renderProductCards(filteredProducts);
   }
-
   const result = filteredData();
 
-  // Log out function (remove cookie and update state)
-  const logoutUser = async () => {
-    try {
-      await fetch('http://localhost:8000/logout', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      removeCookie("jwt");
-      setIsLoggedIn(false);
-    } catch (error) {
-      console.log('Error logging out:', error);
-    }
-  };
-
-  // Check login status
+  
   useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch('http://localhost:8000/profile', {
-          method: 'GET',
-          credentials: 'include'
-        });
-        const data = await response.json();
-        setIsLoggedIn(!!data);
-      } catch (error) {
-        setIsLoggedIn(false);
+    const verifyUser = async () => {
+      if (cookies.jwt) {
+        try {
+          const { data } = await axios.post("http://localhost:4000", {}, { withCredentials: true });
+          if (data.status) {
+            setLoggedIn(true);
+            toast(`Hi ${data.user} 🦄`, { theme: "dark" });
+          } else {
+            removeCookie("jwt");
+            setLoggedIn(false);
+          }
+        } catch (error) {
+          console.error("Error verifying user:", error);
+          removeCookie("jwt");
+          setLoggedIn(false);
+        }
       }
     };
-    checkLoginStatus();
-  }, []);
+    verifyUser();
+  }, [cookies, removeCookie]);
+
 
   return (
     <Router>
-      {/* Pass isLoggedIn and logoutUser to Header for conditional rendering */}
-      <Header isLoggedIn={isLoggedIn} logoutUser={logoutUser} />
+      <Header />
       <Footer />
       <Routes>
         <Route path='/warehouse' element={<Warehouse />} />
         <Route path='/register' element={<Register />} />
-        <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<HomePage />} />
-        <Route path="/products" element={<ProductListPage />} />
+        <Route path="/products" element={<>
+          <Sidebars handleChange={handleChange} />
+          <Navigation query={query} handleInputChange={handleInputChange} />
+          <Recommended handleClick={handleClick} />
+          <Products result={result} />
+        </>} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/cart" element={<CartPage />} />
+        <Route path="/cart" element={
+          <>
+            <Navigationnosearch />
+            <CartPage cart={cart} updateQuantity={updateQuantity} removeItem={removeItem} />
+          </>
+        } />
         <Route path="/checkout" element={<CheckoutPage />} />
       </Routes>
+
       <ToastContainer />
+
     </Router>
   );
 }
